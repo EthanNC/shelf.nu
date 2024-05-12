@@ -11,6 +11,9 @@ export default $config({
   async run() {
     new sst.aws.Remix("MyWeb", {
       buildCommand: "npm run build",
+      environment: {
+        NODE_ENV: $dev ? "development" : "production",
+      },
     });
   },
 });
