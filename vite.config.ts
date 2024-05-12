@@ -9,6 +9,7 @@ import { cjsInterop } from "vite-plugin-cjs-interop";
 export default defineConfig({
   server: {
     port: 3000,
+    open: true,
     // https: {
     //   key: "./server/dev/key.pem",
     //   cert: "./server/dev/cert.pem",
