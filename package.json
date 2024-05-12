@@ -6,7 +6,7 @@
   "scripts": {
     "build": "remix vite:build",
     "build-with-sentry": "remix vite:build --sourcemap && sentry-upload-sourcemaps --org ${SENTRY_ORG} --project ${SENTRY_PROJECT}",
-    "db:deploy": "prisma migrate deploy",
+    "db:deploy": "sst shell bun scripts/deploy.ts",
     "db:deploy-migration": "prisma migrate deploy && prisma generate",
     "db:deploy-migration:production": "dotenv -e .env.production -- prisma migrate deploy && prisma generate",
     "db:deploy-migration:staging": "dotenv -e .env.staging -- prisma migrate deploy && prisma generate",
@@ -65,6 +65,7 @@
     "@stripe/stripe-js": "^3.0.2",
     "@supabase/supabase-js": "^2.39.6",
     "@tremor/react": "^3.14.0",
+    "@types/bun": "^1.1.1",
     "@zxing/library": "^0.20.0",
     "changedpi": "^1.0.4",
     "chardet": "^2.0.0",

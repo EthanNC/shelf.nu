@@ -6,6 +6,7 @@ datasource db {
 
 generator client {
   provider        = "prisma-client-js"
+  binaryTargets   = ["native", "linux-arm64-openssl-3.0.x"]
   previewFeatures = ["views", "fullTextSearch"]
 }
 
@@ -205,16 +206,14 @@ model Qr {
   organization   Organization? @relation(fields: [organizationId], references: [id], onUpdate: Cascade)
   organizationId String?
 
-
-  
   // This batch is used to group QR codes together when they are created as unclaimed and printed
   batch   PrintBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
-  batchId String? 
+  batchId String?
 
   // DateTime
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  scans          Scan[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  scans     Scan[]
 }
 
 model PrintBatch {
@@ -232,7 +231,6 @@ model PrintBatch {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
 
 // Stores a report for when a an asset is reported as found
 model ReportFound {
@@ -565,7 +563,6 @@ model Announcement {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
 
 enum BookingStatus {
   DRAFT
