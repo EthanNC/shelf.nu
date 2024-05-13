@@ -97,8 +97,11 @@ export function initEnv() {
  * Server env
  */
 export const SERVER_URL = getEnv("SERVER_URL");
-export const SUPABASE_SERVICE_ROLE = getEnv("SUPABASE_SERVICE_ROLE");
+export const SUPABASE_SERVICE_ROLE = getEnv("SUPABASE_SERVICE_ROLE", {
+  isRequired: false,
+});
 export const INVITE_TOKEN_SECRET = getEnv("INVITE_TOKEN_SECRET", {
+  isRequired: false,
   isSecret: true,
 });
 export const SESSION_SECRET = getEnv("SESSION_SECRET");
@@ -106,13 +109,22 @@ export const STRIPE_SECRET_KEY = getEnv("STRIPE_SECRET_KEY", {
   isSecret: true,
   isRequired: false,
 });
-export const SMTP_PWD = getEnv("SMTP_PWD");
-export const SMTP_HOST = getEnv("SMTP_HOST");
-export const SMTP_USER = getEnv("SMTP_USER");
+export const SMTP_PWD = getEnv("SMTP_PWD", {
+  isRequired: false,
+});
+export const SMTP_HOST = getEnv("SMTP_HOST", {
+  isRequired: false,
+});
+export const SMTP_USER = getEnv("SMTP_USER", {
+  isRequired: false,
+});
 export const SMTP_FROM = getEnv("SMTP_FROM", {
   isRequired: false,
 });
-export const DATABASE_URL = getEnv("DATABASE_URL");
+export const DATABASE_URL = getEnv("DATABASE_URL", {
+  isSecret: true,
+  isRequired: false,
+});
 export const DIRECT_URL = getEnv("DIRECT_URL", {
   isRequired: false,
 });

@@ -1,6 +1,17 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
+import { Resource } from "sst";
 import { NODE_ENV } from "../utils/env";
+
+const config = {
+  host: Resource.Database.host,
+  database: Resource.Database.database,
+  port: Resource.Database.port,
+  user: Resource.Database.user,
+  password: Resource.Database.password,
+};
+
+const connectString = `postgresql://${config.user}:${config.password}@${config.host}:${config.port}/${config.database}`;
 
 export type ExtendedPrismaClient = ReturnType<typeof getNewPrismaClient>;
 
@@ -13,7 +24,13 @@ declare global {
 
 /** Extending prisma client for dynamic findMany */
 function getNewPrismaClient() {
-  return new PrismaClient().$extends({
+  return new PrismaClient({
+    datasources: {
+      db: {
+        url: connectString,
+      },
+    },
+  }).$extends({
     model: {
       $allModels: {
         dynamicFindMany<T>(this: T, options: Prisma.Args<T, "findMany">) {
