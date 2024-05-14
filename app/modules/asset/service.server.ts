@@ -900,13 +900,14 @@ export async function updateAssetMainImage({
       },
     });
 
-    const image = fileData.get("mainImage") as string;
+    //TODO: Ethan -> actually use signed url instead of public bucket url
+    const signedUrl = fileData.get("mainImage") as string;
+    // console.log(image);
+    // if (!image) {
+    //   return;
+    // }
 
-    if (!image) {
-      return;
-    }
-
-    const signedUrl = await createSignedUrl({ filename: image });
+    // const signedUrl = await createSignedUrl({ filename: image });
 
     await updateAsset({
       id: assetId,

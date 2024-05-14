@@ -11,6 +11,10 @@ declare module "sst" {
       type: "supabase.index/project.Project"
       user: string
     }
+    Media: {
+      name: string
+      type: "sst.aws.Bucket"
+    }
   }
 }
 export {}

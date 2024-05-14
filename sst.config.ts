@@ -36,6 +36,10 @@ export default $config({
       }).result,
     });
 
+    const bucket = new sst.aws.Bucket("Media", {
+      public: true,
+    });
+    bucket.domain;
     const lambdaPrismaConfig = {
       copyFiles: Boolean($dev)
         ? []
@@ -71,7 +75,7 @@ export default $config({
 
     new sst.aws.Remix("MyWeb", {
       buildCommand: "npm run build",
-      link: [project],
+      link: [project, bucket],
       environment: {
         NODE_ENV: $dev ? "development" : "production",
         SESSION_SECRET: new random.RandomString("SessionSecret", {
@@ -88,5 +92,9 @@ export default $config({
         },
       },
     });
+
+    return {
+      bucket: bucket.domain,
+    };
   },
 });

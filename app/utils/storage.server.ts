@@ -3,14 +3,13 @@ import {
   unstable_parseMultipartFormData,
 } from "@remix-run/node";
 import type { ResizeOptions } from "sharp";
-
 import { getSupabaseAdmin } from "~/integrations/supabase/client";
-import { cropImage } from "./crop-image";
 import { SUPABASE_URL } from "./env";
 import type { ErrorLabel } from "./error";
 import { ShelfError } from "./error";
 import { extractImageNameFromSupabaseUrl } from "./extract-image-name-from-supabase-url";
 import { Logger } from "./logger";
+import { s3UploadHandler } from "./s3.server";
 
 const label: ErrorLabel = "File storage";
 
@@ -70,33 +69,6 @@ export async function createSignedUrl({
   }
 }
 
-async function uploadFile(
-  fileData: AsyncIterable<Uint8Array>,
-  { filename, contentType, bucketName, resizeOptions }: UploadOptions
-) {
-  try {
-    const file = await cropImage(fileData, resizeOptions);
-
-    const { data, error } = await getSupabaseAdmin()
-      .storage.from(bucketName)
-      .upload(filename, file, { contentType, upsert: true });
-
-    if (error) {
-      throw error;
-    }
-
-    return data.path;
-  } catch (cause) {
-    throw new ShelfError({
-      cause,
-      message:
-        "Something went wrong while uploading the file. Please try again or contact support.",
-      additionalData: { filename, contentType, bucketName },
-      label,
-    });
-  }
-}
-
 export interface UploadOptions {
   bucketName: string;
   filename: string;
@@ -106,10 +78,9 @@ export interface UploadOptions {
 
 export async function parseFileFormData({
   request,
-  newFileName,
-  bucketName = "profile-pictures",
-  resizeOptions,
-}: {
+  newFileName, // bucketName = "profile-pictures",
+} // resizeOptions,
+: {
   request: Request;
   newFileName: string;
   bucketName?: string;
@@ -123,17 +94,22 @@ export async function parseFileFormData({
         }
 
         const fileExtension = filename?.split(".").pop();
-        const uploadedFilePath = await uploadFile(data, {
+        // const uploadedFilePath = await uploadFile(data, {
+        //   filename: `${newFileName}.${fileExtension}`,
+        //   contentType,
+        //   bucketName,
+        //   resizeOptions,
+        // });
+        const uploadedFilePath = await s3UploadHandler({
+          name: "img",
           filename: `${newFileName}.${fileExtension}`,
           contentType,
-          bucketName,
-          resizeOptions,
+          data,
         });
 
         return uploadedFilePath;
       }
     );
-
     const formData = await unstable_parseMultipartFormData(
       request,
       uploadHandler
