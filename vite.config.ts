@@ -42,11 +42,11 @@ export default defineConfig({
         "react-to-print",
       ],
     }),
-    // devServer({
-    //   injectClientScript: false,
-    //   entry: "server/index.ts", // The file path of your server.
-    //   exclude: [/^\/(app)\/.+/, /^\/@.+$/, /^\/node_modules\/.*/],
-    // }),
+    devServer({
+      injectClientScript: false,
+      entry: "server/index.ts", // The file path of your server.
+      exclude: [/^\/(app)\/.+/, /^\/@.+$/, /^\/node_modules\/.*/],
+    }),
     remix({
       // serverBuildFile: "remix.js",
       ignoredRouteFiles: ["**/.*"],

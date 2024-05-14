@@ -80,6 +80,7 @@ export default $config({
         SERVER_URL: "http://localhost:3000/",
         SUPABASE_URL: $interpolate`https://${project.id}.supabase.co`,
         SUPABASE_ANON_PUBLIC: process.env.SUPABASE_ANON_PUBLIC!,
+        SUPABASE_SERVICE_ROLE: process.env.SUPABASE_SERVICE_ROLE!,
       },
       transform: {
         server: {

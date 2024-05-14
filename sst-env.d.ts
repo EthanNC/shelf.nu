@@ -1,16 +1,16 @@
 /* tslint:disable */
 /* eslint-disable */
-import "sst";
+import "sst"
 declare module "sst" {
   export interface Resource {
     Database: {
-      database: string;
-      host: string;
-      password: string;
-      port: number;
-      type: "supabase.index/project.Project";
-      user: string;
-    };
+      database: string
+      host: string
+      password: string
+      port: number
+      type: "supabase.index/project.Project"
+      user: string
+    }
   }
 }
-export {};
+export {}
