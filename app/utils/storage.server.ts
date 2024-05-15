@@ -50,7 +50,9 @@ export async function createSignedUrl({ s3Url }: { s3Url: string }) {
       ...client.config,
     });
     // Create a GET request from S3 url.
-    const url = await presigner.presign(new HttpRequest(s3ObjectUrl));
+    const url = await presigner.presign(new HttpRequest(s3ObjectUrl), {
+      expiresIn: 86400,
+    });
     return formatUrl(url);
   } catch (cause) {
     throw new ShelfError({

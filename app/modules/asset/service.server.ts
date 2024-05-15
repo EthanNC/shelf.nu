@@ -1,3 +1,4 @@
+import { Readable } from "stream";
 import type {
   Category,
   Location,
@@ -14,7 +15,6 @@ import type {
 import { AssetStatus, BookingStatus, ErrorCorrection } from "@prisma/client";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { db } from "~/database/db.server";
-import { getSupabaseAdmin } from "~/integrations/supabase/client";
 import { createCategoriesIfNotExists } from "~/modules/category/service.server";
 import {
   createCustomFieldsIfNotExists,
@@ -38,8 +38,8 @@ import { ShelfError, maybeUniqueConstraintViolation } from "~/utils/error";
 import { getCurrentSearchParams } from "~/utils/http.server";
 import { getParamsValues } from "~/utils/list";
 import { oneDayFromNow } from "~/utils/one-week-from-now";
+import { s3UploadHandler } from "~/utils/s3.server";
 import { createSignedUrl, parseFileFormData } from "~/utils/storage.server";
-
 import type {
   CreateAssetFromBackupImportPayload,
   CreateAssetFromContentImportPayload,
@@ -1025,24 +1025,37 @@ async function uploadDuplicateAssetMainImage(
      * that we can upload it into duplicated assets as well
      * */
     const imageFile = await fetch(mainImageUrl);
-    const imageFileBlob = await imageFile.blob();
+    const buffer = Buffer.from(await imageFile.arrayBuffer());
+    const stream = Readable.from(buffer);
 
     /** Uploading the Blob to supabase */
-    const { data, error } = await getSupabaseAdmin()
-      .storage.from("assets")
-      .upload(
-        `${userId}/${assetId}/main-image-${dateTimeInUnix(Date.now())}`,
-        imageFileBlob,
-        { contentType: imageFileBlob.type, upsert: true }
-      );
+    // const { data, error } = await getSupabaseAdmin()
+    //   .storage.from("assets")
+    //   .upload(
+    //     `${userId}/${assetId}/main-image-${dateTimeInUnix(Date.now())}`,
+    //     imageFileBlob,
+    //     { contentType: imageFileBlob.type, upsert: true }
+    //   );
 
-    if (error) {
-      throw error;
+    const uploadedFilePath = await s3UploadHandler({
+      name: "img",
+      filename: `${userId}/${assetId}/main-image-${dateTimeInUnix(Date.now())}`,
+      contentType: imageFile.type,
+      data: stream,
+    });
+
+    if (!uploadedFilePath) {
+      throw new ShelfError({
+        cause: null,
+        message: "Invalid file URL",
+        additionalData: { mainImageUrl, assetId, userId },
+        label,
+      });
     }
 
     /** Getting the signed url from supabase to we can view image  */
     //TODO: s3 Conversion
-    return await createSignedUrl({ s3Url: data.path });
+    return await createSignedUrl({ s3Url: uploadedFilePath as string });
   } catch (cause) {
     throw new ShelfError({
       cause,
