@@ -34,8 +34,9 @@ export async function action({ context, request }: ActionFunctionArgs) {
       });
     }
 
+    //TODO: s3 conversion
     const signedUrl = await createSignedUrl({
-      filename,
+      s3Url: filename,
     });
 
     const asset = await updateAsset({

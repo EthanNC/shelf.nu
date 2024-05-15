@@ -40,7 +40,9 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.575.0",
     "@aws-sdk/lib-storage": "^3.575.0",
+    "@aws-sdk/protocol-http": "^3.374.0",
     "@aws-sdk/s3-request-presigner": "^3.575.0",
+    "@aws-sdk/url-parser": "^3.374.0",
     "@fullcalendar/core": "^6.1.11",
     "@fullcalendar/daygrid": "^6.1.11",
     "@fullcalendar/list": "^6.1.11",

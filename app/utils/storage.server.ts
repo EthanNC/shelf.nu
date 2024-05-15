@@ -1,3 +1,8 @@
+import { S3Client } from "@aws-sdk/client-s3";
+import { HttpRequest } from "@aws-sdk/protocol-http";
+import { S3RequestPresigner } from "@aws-sdk/s3-request-presigner";
+import { parseUrl } from "@aws-sdk/url-parser";
+import { formatUrl } from "@aws-sdk/util-format-url";
 import {
   unstable_composeUploadHandlers,
   unstable_parseMultipartFormData,
@@ -36,34 +41,22 @@ export function getPublicFileURL({
   }
 }
 
-export async function createSignedUrl({
-  filename,
-  bucketName = "assets",
-}: {
-  filename: string;
-  bucketName?: string;
-}) {
+export async function createSignedUrl({ s3Url }: { s3Url: string }) {
   try {
-    // Check if there is a leading slash and we need to remove it as signing will not work with the slash included
-    if (filename.startsWith("/")) {
-      filename = filename.substring(1); // Remove the first character
-    }
-
-    const { data, error } = await getSupabaseAdmin()
-      .storage.from(bucketName)
-      .createSignedUrl(filename, 24 * 60 * 60); //24h
-
-    if (error) {
-      throw error;
-    }
-
-    return data.signedUrl;
+    const client = new S3Client({});
+    const s3ObjectUrl = parseUrl(s3Url);
+    const presigner = new S3RequestPresigner({
+      ...client.config,
+    });
+    // Create a GET request from S3 url.
+    const url = await presigner.presign(new HttpRequest(s3ObjectUrl));
+    return formatUrl(url);
   } catch (cause) {
     throw new ShelfError({
       cause,
       message:
         "Something went wrong while creating a signed URL. Please try again. If the issue persists contact support.",
-      additionalData: { filename, bucketName },
+      additionalData: { url: s3Url },
       label,
     });
   }
@@ -110,6 +103,7 @@ export async function parseFileFormData({
         return uploadedFilePath;
       }
     );
+
     const formData = await unstable_parseMultipartFormData(
       request,
       uploadHandler

@@ -36,9 +36,7 @@ export default $config({
       }).result,
     });
 
-    const bucket = new sst.aws.Bucket("Media", {
-      public: true,
-    });
+    const bucket = new sst.aws.Bucket("Media");
     bucket.domain;
     const lambdaPrismaConfig = {
       copyFiles: Boolean($dev)

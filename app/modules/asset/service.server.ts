@@ -900,14 +900,13 @@ export async function updateAssetMainImage({
       },
     });
 
-    //TODO: Ethan -> actually use signed url instead of public bucket url
-    const signedUrl = fileData.get("mainImage") as string;
-    // console.log(image);
-    // if (!image) {
-    //   return;
-    // }
+    const image = fileData.get("mainImage") as string;
 
-    // const signedUrl = await createSignedUrl({ filename: image });
+    if (!image) {
+      return;
+    }
+
+    const signedUrl = await createSignedUrl({ s3Url: image });
 
     await updateAsset({
       id: assetId,
@@ -1042,7 +1041,8 @@ async function uploadDuplicateAssetMainImage(
     }
 
     /** Getting the signed url from supabase to we can view image  */
-    return await createSignedUrl({ filename: data.path });
+    //TODO: s3 Conversion
+    return await createSignedUrl({ s3Url: data.path });
   } catch (cause) {
     throw new ShelfError({
       cause,
