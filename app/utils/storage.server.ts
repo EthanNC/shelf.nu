@@ -9,6 +9,7 @@ import {
 } from "@remix-run/node";
 import type { ResizeOptions } from "sharp";
 import { getSupabaseAdmin } from "~/integrations/supabase/client";
+import { cropImage } from "./crop-image";
 import { SUPABASE_URL } from "./env";
 import type { ErrorLabel } from "./error";
 import { ShelfError } from "./error";
@@ -71,8 +72,9 @@ export interface UploadOptions {
 
 export async function parseFileFormData({
   request,
-  newFileName, // bucketName = "profile-pictures",
-} // resizeOptions,
+  newFileName,
+  resizeOptions, // resizeOptions,
+} // bucketName = "profile-pictures",
 : {
   request: Request;
   newFileName: string;
@@ -93,11 +95,12 @@ export async function parseFileFormData({
         //   bucketName,
         //   resizeOptions,
         // });
+        const image = await cropImage(data, resizeOptions);
         const uploadedFilePath = await s3UploadHandler({
           name: "img",
           filename: `${newFileName}.${fileExtension}`,
           contentType,
-          data,
+          data: image,
         });
 
         return uploadedFilePath;

@@ -1,3 +1,4 @@
+import { Readable } from "stream";
 import type { ResizeOptions } from "sharp";
 import { ShelfError } from "./error";
 
@@ -13,7 +14,7 @@ export const cropImage = async (
 
     const sharp = (await import("sharp")).default;
 
-    return await sharp(Buffer.concat(chunks))
+    const buffer = await sharp(Buffer.concat(chunks))
       .rotate()
       .resize(
         options || {
@@ -25,6 +26,8 @@ export const cropImage = async (
       )
       .toFormat("webp")
       .toBuffer();
+
+    return Readable.from(buffer);
   } catch (cause) {
     throw new ShelfError({
       cause,
