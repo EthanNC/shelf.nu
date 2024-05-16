@@ -23,7 +23,6 @@ import { getCurrentSearchParams } from "~/utils/http.server";
 import { getParamsValues } from "~/utils/list";
 import {
   deleteProfilePicture,
-  getPublicFileURL,
   parseFileFormData,
 } from "~/utils/storage.server";
 import { randomUsernameFromEmail } from "~/utils/user";
@@ -420,6 +419,7 @@ export async function updateProfilePicture({
         fit: sharp.fit.cover,
         withoutEnlargement: true,
       },
+      bucketName: "profile",
     });
 
     const profilePicture = fileData.get("profile-picture") as string;
@@ -427,16 +427,15 @@ export async function updateProfilePicture({
     /**
      * Delete the old image, if a new one was uploaded
      */
-    if (profilePicture && previousProfilePictureUrl) {
-      await deleteProfilePicture({ url: previousProfilePictureUrl });
-    }
+    //TODO: Reimplement this without supabase
+    // if (profilePicture && previousProfilePictureUrl) {
+    //   await deleteProfilePicture({ url: previousProfilePictureUrl });
+    // }
 
     /** Update user with new picture */
     return await updateUser({
       id: userId,
-      profilePicture: profilePicture
-        ? getPublicFileURL({ filename: profilePicture })
-        : undefined,
+      profilePicture: profilePicture,
     });
   } catch (cause) {
     throw new ShelfError({

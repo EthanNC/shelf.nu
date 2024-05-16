@@ -15,6 +15,10 @@ declare module "sst" {
       name: string
       type: "sst.aws.Bucket"
     }
+    Profile: {
+      name: string
+      type: "sst.aws.Bucket"
+    }
   }
 }
 export {}

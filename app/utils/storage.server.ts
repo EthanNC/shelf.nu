@@ -15,6 +15,7 @@ import type { ErrorLabel } from "./error";
 import { ShelfError } from "./error";
 import { extractImageNameFromSupabaseUrl } from "./extract-image-name-from-supabase-url";
 import { Logger } from "./logger";
+import type { Bucket } from "./s3.server";
 import { s3UploadHandler } from "./s3.server";
 
 const label: ErrorLabel = "File storage";
@@ -75,12 +76,12 @@ export interface UploadOptions {
 export async function parseFileFormData({
   request,
   newFileName,
-  resizeOptions, // resizeOptions,
-} // bucketName = "profile-pictures",
-: {
+  resizeOptions,
+  bucketName = "media",
+}: {
   request: Request;
   newFileName: string;
-  bucketName?: string;
+  bucketName?: Bucket;
   resizeOptions?: ResizeOptions;
 }) {
   try {
@@ -91,18 +92,13 @@ export async function parseFileFormData({
         }
 
         const fileExtension = filename?.split(".").pop();
-        // const uploadedFilePath = await uploadFile(data, {
-        //   filename: `${newFileName}.${fileExtension}`,
-        //   contentType,
-        //   bucketName,
-        //   resizeOptions,
-        // });
         const image = await cropImage(data, resizeOptions);
         const uploadedFilePath = await s3UploadHandler({
           name: "img",
           filename: `${newFileName}.${fileExtension}`,
           contentType,
           data: image,
+          bucketName,
         });
 
         return uploadedFilePath;

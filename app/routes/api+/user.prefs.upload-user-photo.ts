@@ -33,6 +33,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
         fit: sharp.fit.cover,
         withoutEnlargement: true,
       },
+      bucketName: "profile",
     });
 
     const profilePicture = formData.get("file") as string;
@@ -45,16 +46,16 @@ export async function action({ context, request }: ActionFunctionArgs) {
         label: "File storage",
       });
     }
-
-    if (previousProfilePictureUrl) {
-      /** Delete the old picture  */
-      await deleteProfilePicture({ url: previousProfilePictureUrl });
-    }
+    //TODO: Reimplement this without supabase
+    // if (previousProfilePictureUrl) {
+    //   /** Delete the old picture  */
+    //   await deleteProfilePicture({ url: previousProfilePictureUrl });
+    // }
 
     /** Update user with new picture */
     const updatedUser = await updateUser({
       id: userId,
-      profilePicture: getPublicFileURL({ filename: profilePicture }),
+      profilePicture: profilePicture,
     });
 
     return json(data({ updatedUser }));

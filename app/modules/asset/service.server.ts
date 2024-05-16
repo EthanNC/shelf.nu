@@ -890,7 +890,7 @@ export async function updateAssetMainImage({
   try {
     const fileData = await parseFileFormData({
       request,
-      bucketName: "assets",
+      bucketName: "media",
       newFileName: `${userId}/${assetId}/main-image-${dateTimeInUnix(
         Date.now()
       )}`,
@@ -1042,6 +1042,7 @@ async function uploadDuplicateAssetMainImage(
       filename: `${userId}/${assetId}/main-image-${dateTimeInUnix(Date.now())}`,
       contentType: imageFile.type,
       data: stream,
+      bucketName: "media",
     });
 
     if (!uploadedFilePath) {
@@ -1053,8 +1054,6 @@ async function uploadDuplicateAssetMainImage(
       });
     }
 
-    /** Getting the signed url from supabase to we can view image  */
-    //TODO: s3 Conversion
     return await createSignedUrl({ s3Url: uploadedFilePath as string });
   } catch (cause) {
     throw new ShelfError({
