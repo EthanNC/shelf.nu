@@ -6,7 +6,10 @@ import { dateTimeInUnix } from "~/utils/date-time-in-unix";
 import { makeShelfError, ShelfError } from "~/utils/error";
 
 import { assertIsPost, data, error } from "~/utils/http.server";
-import { parseFileFormData } from "~/utils/storage.server";
+import {
+  deleteProfilePicture,
+  parseFileFormData,
+} from "~/utils/storage.server";
 
 export async function action({ context, request }: ActionFunctionArgs) {
   const authSession = context.getSession();
@@ -42,11 +45,11 @@ export async function action({ context, request }: ActionFunctionArgs) {
         label: "File storage",
       });
     }
-    //TODO: Reimplement this without supabase
-    // if (previousProfilePictureUrl) {
-    //   /** Delete the old picture  */
-    //   await deleteProfilePicture({ url: previousProfilePictureUrl });
-    // }
+
+    if (previousProfilePictureUrl) {
+      /** Delete the old picture  */
+      await deleteProfilePicture({ url: previousProfilePictureUrl });
+    }
 
     /** Update user with new picture */
     const updatedUser = await updateUser({

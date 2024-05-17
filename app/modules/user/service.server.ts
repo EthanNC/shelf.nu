@@ -427,10 +427,10 @@ export async function updateProfilePicture({
     /**
      * Delete the old image, if a new one was uploaded
      */
-    //TODO: Reimplement this without supabase
-    // if (profilePicture && previousProfilePictureUrl) {
-    //   await deleteProfilePicture({ url: previousProfilePictureUrl });
-    // }
+
+    if (profilePicture && previousProfilePictureUrl) {
+      await deleteProfilePicture({ url: previousProfilePictureUrl });
+    }
 
     /** Update user with new picture */
     return await updateUser({

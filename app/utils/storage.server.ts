@@ -99,33 +99,21 @@ export async function parseFileFormData({
 
 export async function deleteProfilePicture({
   url,
-  bucketName = "profile-pictures",
+  bucketName = "profile",
 }: {
   url: string;
-  bucketName?: string;
+  bucketName?: Bucket;
 }) {
+  const client = new S3Client({});
+
+  const path = new URL(url).pathname.slice(1);
+  const command = new DeleteObjectCommand({
+    Bucket: BucketMap[bucketName],
+    Key: path,
+  });
+
   try {
-    if (
-      !url.startsWith(
-        `${SUPABASE_URL}/storage/v1/object/public/profile-pictures/`
-      ) ||
-      url === ""
-    ) {
-      throw new ShelfError({
-        cause: null,
-        message: "Invalid file URL",
-        additionalData: { url },
-        label,
-      });
-    }
-
-    const { error } = await getSupabaseAdmin()
-      .storage.from(bucketName)
-      .remove([url.split(`${bucketName}/`)[1]]);
-
-    if (error) {
-      throw error;
-    }
+    await client.send(command);
   } catch (cause) {
     Logger.error(
       new ShelfError({
