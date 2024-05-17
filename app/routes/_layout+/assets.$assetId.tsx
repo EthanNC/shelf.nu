@@ -192,7 +192,7 @@ export async function action({ context, request, params }: ActionFunctionArgs) {
         if (mainImageUrl) {
           await deleteAssetImage({
             url: mainImageUrl,
-            bucketName: "assets",
+            bucketName: "media",
           });
         }
 

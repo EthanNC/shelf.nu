@@ -66,7 +66,7 @@ export const s3UploadHandler = async ({
   return uploadedFileLocation;
 };
 
-const BucketMap = {
+export const BucketMap = {
   media: Resource.Media.name,
   profile: Resource.Profile.name,
 } as const;

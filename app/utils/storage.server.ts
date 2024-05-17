@@ -1,4 +1,4 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { HttpRequest } from "@aws-sdk/protocol-http";
 import { S3RequestPresigner } from "@aws-sdk/s3-request-presigner";
 import { parseUrl } from "@aws-sdk/url-parser";
@@ -13,35 +13,11 @@ import { cropImage } from "./crop-image";
 import { SUPABASE_URL } from "./env";
 import type { ErrorLabel } from "./error";
 import { ShelfError } from "./error";
-import { extractImageNameFromSupabaseUrl } from "./extract-image-name-from-supabase-url";
 import { Logger } from "./logger";
 import type { Bucket } from "./s3.server";
-import { s3UploadHandler } from "./s3.server";
+import { BucketMap, s3UploadHandler } from "./s3.server";
 
 const label: ErrorLabel = "File storage";
-
-export function getPublicFileURL({
-  filename,
-  bucketName = "profile-pictures",
-}: {
-  filename: string;
-  bucketName?: string;
-}) {
-  try {
-    const { data } = getSupabaseAdmin()
-      .storage.from(bucketName)
-      .getPublicUrl(filename);
-
-    return data.publicUrl;
-  } catch (cause) {
-    throw new ShelfError({
-      cause,
-      message: "Failed to get public file URL",
-      additionalData: { filename, bucketName },
-      label,
-    });
-  }
-}
 
 export async function createSignedUrl({ s3Url }: { s3Url: string }) {
   try {
@@ -167,27 +143,18 @@ export async function deleteAssetImage({
   bucketName,
 }: {
   url: string;
-  bucketName: string;
+  bucketName: Bucket;
 }) {
+  const client = new S3Client({});
+
+  const path = new URL(url).pathname.slice(1);
+  const command = new DeleteObjectCommand({
+    Bucket: BucketMap[bucketName],
+    Key: path,
+  });
+
   try {
-    const path = extractImageNameFromSupabaseUrl({ url, bucketName });
-    if (!path) {
-      throw new ShelfError({
-        cause: null,
-        message: "Cannot extract the image path from the URL",
-        additionalData: { url, bucketName },
-        label,
-      });
-    }
-
-    const { error } = await getSupabaseAdmin()
-      .storage.from(bucketName)
-      .remove([path]);
-
-    if (error) {
-      throw error;
-    }
-
+    await client.send(command);
     return true;
   } catch (cause) {
     Logger.error(
