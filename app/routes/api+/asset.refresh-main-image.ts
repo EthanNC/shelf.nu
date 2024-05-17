@@ -20,10 +20,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
     );
 
     const url = new URL(mainImage);
-    const path = url.pathname;
-    const start = path.indexOf("/assets/");
-    const filename =
-      start !== -1 ? path.slice(start + "/assets/".length) : null;
+    const filename = url.origin + url.pathname;
 
     if (!filename) {
       throw new ShelfError({
@@ -34,7 +31,6 @@ export async function action({ context, request }: ActionFunctionArgs) {
       });
     }
 
-    //TODO: s3 conversion
     const signedUrl = await createSignedUrl({
       s3Url: filename,
     });

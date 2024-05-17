@@ -6,11 +6,7 @@ import { dateTimeInUnix } from "~/utils/date-time-in-unix";
 import { makeShelfError, ShelfError } from "~/utils/error";
 
 import { assertIsPost, data, error } from "~/utils/http.server";
-import {
-  deleteProfilePicture,
-  getPublicFileURL,
-  parseFileFormData,
-} from "~/utils/storage.server";
+import { parseFileFormData } from "~/utils/storage.server";
 
 export async function action({ context, request }: ActionFunctionArgs) {
   const authSession = context.getSession();
