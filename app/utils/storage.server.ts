@@ -8,9 +8,7 @@ import {
   unstable_parseMultipartFormData,
 } from "@remix-run/node";
 import type { ResizeOptions } from "sharp";
-import { getSupabaseAdmin } from "~/integrations/supabase/client";
 import { cropImage } from "./crop-image";
-import { SUPABASE_URL } from "./env";
 import type { ErrorLabel } from "./error";
 import { ShelfError } from "./error";
 import { Logger } from "./logger";
