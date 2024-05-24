@@ -19,9 +19,14 @@ import {
 
 export async function loader({ context, request, params }: LoaderFunctionArgs) {
   const authSession = context.isAuthenticated
-    ? context.getSession()
+    ? context.session
     : { userId: "anonymous" };
-  const { userId } = authSession;
+
+  let userId: string | undefined;
+
+  if (authSession && "userId" in authSession) {
+    userId = authSession.userId;
+  }
   const { qrId: id } = getParams(params, z.object({ qrId: z.string() }), {
     additionalData: { userId },
   });

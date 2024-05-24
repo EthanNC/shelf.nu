@@ -42,7 +42,7 @@ import { requirePermission } from "~/utils/roles.server";
 import { MAX_SIZE } from "./settings.workspace.new";
 
 export async function loader({ context, request, params }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { workspaceId: id } = getParams(
     params,
@@ -110,7 +110,7 @@ export const handle = {
 };
 
 export async function action({ context, request, params }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { workspaceId: id } = getParams(
     params,

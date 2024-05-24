@@ -12,7 +12,7 @@ import {
 } from "~/utils/storage.server";
 
 export async function action({ context, request }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

@@ -26,7 +26,7 @@ import { requirePermission } from "~/utils/roles.server";
 const title = "New Custom Field";
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {
@@ -75,7 +75,7 @@ export const handle = {
 };
 
 export async function action({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

@@ -4,7 +4,7 @@ import { assertIsPost, data, error } from "~/utils/http.server";
 import { parseMarkdownToReact } from "~/utils/md.server";
 
 export async function action({ context, request }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

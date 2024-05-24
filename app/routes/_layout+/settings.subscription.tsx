@@ -42,7 +42,7 @@ import {
 } from "~/utils/stripe.server";
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {
@@ -109,8 +109,9 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
 }
 
 export async function action({ context, request }: ActionFunctionArgs) {
-  const authSession = context.getSession();
-  const { userId, email } = authSession;
+  const authSession = context.session;
+  const { userId } = authSession;
+  const email = context.user.email;
 
   try {
     await requirePermission({

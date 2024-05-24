@@ -35,7 +35,7 @@ import { canUseBookings } from "~/utils/subscription";
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

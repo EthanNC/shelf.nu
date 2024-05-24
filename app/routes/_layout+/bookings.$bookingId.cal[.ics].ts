@@ -14,7 +14,7 @@ import {
 import { requirePermission } from "~/utils/roles.server";
 
 export async function loader({ request, context, params }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { bookingId } = getParams(params, z.object({ bookingId: z.string() }), {
     additionalData: { userId },

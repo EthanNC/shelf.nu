@@ -53,7 +53,7 @@ const Actions = z.discriminatedUnion("intent", [
 ]);
 
 export async function action({ context, request }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

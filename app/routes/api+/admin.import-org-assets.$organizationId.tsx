@@ -9,7 +9,7 @@ import { extractCSVDataFromBackupImport } from "~/utils/import.server";
 import { requireAdmin } from "~/utils/roles.server";
 
 export async function action({ context, request, params }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { organizationId } = getParams(
     params,

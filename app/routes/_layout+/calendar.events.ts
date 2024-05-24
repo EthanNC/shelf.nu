@@ -13,7 +13,7 @@ import { requirePermission } from "~/utils/roles.server";
 
 // Loader Function to Return Bookings Data
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

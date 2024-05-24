@@ -3,12 +3,14 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import type { AppLoadContext, ServerBuild } from "@remix-run/node";
 import { createCookieSessionStorage } from "@remix-run/node";
 import { Hono } from "hono";
+import type { Session, User } from "lucia";
 import { remix } from "remix-hono/handler";
 import { getSession, session } from "remix-hono/session";
 
 import { initEnv, env } from "~/utils/env";
 import { ShelfError } from "~/utils/error";
 
+import { auth } from "./auth";
 import { importDevBuild } from "./dev/server";
 import { logger } from "./logger";
 import { cache, protect, refreshSession } from "./middleware";
@@ -129,39 +131,22 @@ app.use(async (c, next) => {
   return remix({
     build,
     mode,
-    getLoadContext(context) {
-      const session = getSession<SessionData, FlashData>(context);
+    async getLoadContext(context) {
+      const { session, user } = await auth(context);
+
+      //TODO: use Shelf Error here
+      if (!session || !user) {
+        throw new Error("Session or user not found");
+      }
 
       return {
         // Nice to have if you want to display the app version or do something in the app when deploying a new version
         // Exemple: on navigate, check if the app version is the same as the one in the build assets and if not, display a toast to the user to refresh the page
         // Prevent the user to use an old version of the client side code (it is only downloaded on document request)
         appVersion: isProductionMode ? build.assets.version : "dev",
-        isAuthenticated: session.has(authSessionKey),
-        // we could ensure that session.get() match a specific shape
-        // let's trust our system for now
-        getSession: () => {
-          const auth = session.get(authSessionKey);
-
-          if (!auth) {
-            throw new ShelfError({
-              cause: null,
-              message:
-                "There is no session here. This should not happen because if you require it, this route should be mark as protected and catch by the protect middleware.",
-              status: 403,
-              label: "Dev error",
-            });
-          }
-
-          return auth;
-        },
-        setSession: (auth: any) => {
-          session.set(authSessionKey, auth);
-        },
-        destroySession: () => {
-          session.unset(authSessionKey);
-        },
-        errorMessage: session.get("errorMessage") || null,
+        isAuthenticated: !!user,
+        user,
+        session,
       } satisfies AppLoadContext;
     },
   })(c, next);
@@ -181,31 +166,13 @@ declare module "@remix-run/node" {
      */
     isAuthenticated: boolean;
     /**
-     * Get the current session
-     *
-     * If the user is not logged it will throw an error
-     *
-     * @returns The session
+     * The user object
      */
-    getSession(): SessionData["auth"];
+    user: User;
     /**
-     * Set the session to the session storage
-     *
-     * It will then be automatically handled by the session middleware
-     *
-     * @param session - The auth session to commit
+     * The session object
      */
-    setSession(session: SessionData["auth"]): void;
-    /**
-     * Destroy the session from the session storage middleware
-     *
-     * It will then be automatically handled by the session middleware
-     */
-    destroySession(): void;
-    /**
-     * The flash error message related to session
-     */
-    errorMessage: string | null;
+    session: Session;
   }
 }
 

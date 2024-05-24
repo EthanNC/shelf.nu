@@ -12,7 +12,7 @@ export const ClientNotificationSchema = z.object({
 });
 
 export async function action({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

@@ -305,7 +305,7 @@ export async function checkUserAndInviteMatch({
   context: AppLoadContext;
   params: Params<string>;
 }) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   /** We get the user, selecting only the email */

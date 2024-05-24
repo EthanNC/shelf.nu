@@ -40,7 +40,7 @@ import {
 import { requirePermission } from "~/utils/roles.server";
 
 export async function loader({ context, request, params }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { qrId } = getParams(params, z.object({ qrId: z.string() }));
   let claimed = false;
@@ -94,7 +94,7 @@ export async function loader({ context, request, params }: LoaderFunctionArgs) {
 }
 
 export async function action({ context, request, params }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { qrId } = getParams(params, z.object({ qrId: z.string() }));
 

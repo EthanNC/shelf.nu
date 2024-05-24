@@ -14,7 +14,7 @@ import { makeShelfError, ShelfError } from "~/utils/error";
 import { data, error, getParams } from "~/utils/http.server";
 
 export const loader = async ({ context, params }: LoaderFunctionArgs) => {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { qrId } = getParams(params, z.object({ qrId: z.string() }));
 

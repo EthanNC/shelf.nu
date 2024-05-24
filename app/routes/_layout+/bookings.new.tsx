@@ -32,7 +32,7 @@ import { requirePermission } from "~/utils/roles.server";
  * This way all actions are available and its way easier to manage so in a way this works kind of like a resource route.
  */
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {
@@ -110,7 +110,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
 }
 
 export async function action({ context, request }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

@@ -15,7 +15,7 @@ import { getParams, data, error, parseData } from "~/utils/http.server";
 import { requireAdmin } from "~/utils/roles.server";
 
 export const loader = async ({ context, params }: LoaderFunctionArgs) => {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { organizationId } = getParams(
     params,
@@ -61,7 +61,7 @@ export const action = async ({
   request,
   params,
 }: ActionFunctionArgs) => {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { organizationId } = getParams(
     params,

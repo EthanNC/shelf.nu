@@ -56,7 +56,7 @@ const EditWorkspaceFormSchema = z.object({
 });
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {
@@ -158,7 +158,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 export const ErrorBoundary = () => <ErrorContent />;
 
 export async function action({ context, request }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

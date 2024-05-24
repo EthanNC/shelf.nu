@@ -34,6 +34,7 @@ model User {
   id             String  @id @default(cuid())
   email          String  @unique
   username       String  @unique @default(cuid())
+  password       String
   firstName      String?
   lastName       String?
   profilePicture String?
@@ -65,8 +66,16 @@ model User {
   userOrganizations UserOrganization[]
   bookings          Booking[]          @relation("creator")
   custodies         Booking[]          @relation("custodian")
+  sessions          Session[]
 
   @@unique([email, username])
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
 }
 
 model Asset {

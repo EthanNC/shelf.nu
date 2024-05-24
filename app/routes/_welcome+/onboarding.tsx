@@ -61,7 +61,7 @@ function createOnboardingSchema(userSignedUpWithPassword: boolean) {
 }
 
 export async function loader({ context }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {
@@ -104,7 +104,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 ];
 
 export async function action({ context, request }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

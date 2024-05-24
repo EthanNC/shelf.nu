@@ -33,7 +33,7 @@ import { requirePermission } from "~/utils/roles.server";
 const title = "New Location";
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {
@@ -66,7 +66,7 @@ export const handle = {
 export const MAX_SIZE = 1024 * 1024 * 4; // 4MB
 
 export async function action({ context, request }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

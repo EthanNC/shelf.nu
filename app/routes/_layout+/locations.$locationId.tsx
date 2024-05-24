@@ -52,7 +52,7 @@ import { requirePermission } from "~/utils/roles.server";
 import { tw } from "~/utils/tw";
 
 export async function loader({ context, request, params }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { locationId: id } = getParams(
     params,
@@ -133,7 +133,7 @@ export const links: LinksFunction = () => [
 ];
 
 export async function action({ context, request, params }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { locationId: id } = getParams(
     params,
