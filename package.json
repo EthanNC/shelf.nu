@@ -22,7 +22,7 @@
     "prepare": "husky install",
     "pretest:e2e:run": "npm run build",
     "production:dev": "dotenv -e .env.production -- run-p dev:*",
-    "reset:db": "prisma migrate reset",
+    "reset:db": "sst shell bun scripts/reset-db.ts",
     "reset:db:staging": "dotenv -e .env.staging -- prisma migrate reset",
     "setup": "prisma generate && prisma migrate deploy",
     "staging:dev": "dotenv -e .env.staging -- run-p dev:*",
