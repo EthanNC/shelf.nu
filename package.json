@@ -178,5 +178,8 @@
   },
   "prisma": {
     "schema": "app/database/schema.prisma"
+  },
+  "volta": {
+    "node": "20.13.1"
   }
 }
