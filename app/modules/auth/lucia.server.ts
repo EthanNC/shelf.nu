@@ -1,9 +1,16 @@
 import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
 import type { User } from "@prisma/client";
 import { redirect } from "@remix-run/node";
-import { Lucia } from "lucia";
+import { Lucia, generateId } from "lucia";
 import { parseCookies } from "oslo/cookie";
+import { Argon2id } from "oslo/password";
 import { db } from "~/database/db.server";
+import { ShelfError, isLikeShelfError } from "~/utils/error";
+import type { ErrorLabel } from "~/utils/error";
+import { randomUsernameFromEmail } from "~/utils/user";
+import { createUser } from "../user/service.server";
+
+const label: ErrorLabel = "Lucia";
 
 const adapter = new PrismaAdapter(db.session, db.user);
 
@@ -47,3 +54,45 @@ export function destroySession() {
     },
   });
 }
+
+export async function signUpWithEmailPass(email: string, password: string) {
+  try {
+    const hashedPassword = await new Argon2id().hash(password);
+    const userId = generateId(15);
+
+    await createUser({
+      id: userId,
+      email,
+      username: randomUsernameFromEmail(email),
+      password: hashedPassword,
+    });
+
+    //adds a session to the user in the db
+    const session = await lucia.createSession(userId, {});
+    const sessionCookie = lucia.createSessionCookie(session.id);
+    return sessionCookie;
+  } catch (cause) {
+    throw new ShelfError({
+      cause,
+      message: isLikeShelfError(cause)
+        ? cause.message
+        : `There was an issue hashing a new user's password: ${email}`,
+      additionalData: { email },
+      label,
+    });
+  }
+}
+
+// export function createSession(user: User) {
+//   const sessionCookie = lucia.createSessionCookie({
+//     attributes: {
+//       email: user.email,
+//     },
+//   });
+
+//   return redirect("/", {
+//     headers: {
+//       "Set-Cookie": sessionCookie.serialize(),
+//     },
+//   });
+// }

@@ -17,7 +17,7 @@ import Input from "~/components/forms/input";
 import PasswordInput from "~/components/forms/password-input";
 import { Button } from "~/components/shared/button";
 import { ContinueWithEmailForm } from "~/modules/auth/components/continue-with-email-form";
-import { signUpWithEmailPass } from "~/modules/auth/service.server";
+import { signUpWithEmailPass } from "~/modules/auth/lucia.server";
 import { findUserByEmail } from "~/modules/user/service.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { ShelfError, makeShelfError, notAllowedMethod } from "~/utils/error";
@@ -89,11 +89,16 @@ export async function action({ request }: ActionFunctionArgs) {
         }
 
         // Sign up with the provided email and password
-        await signUpWithEmailPass(email, password);
-
-        return redirect(
-          `/otp?email=${encodeURIComponent(email)}&mode=confirm_signup`
-        );
+        const sessionCookie = await signUpWithEmailPass(email, password);
+        //TODO: add this back when email verification is added
+        // return redirect(
+        //   `/otp?email=${encodeURIComponent(email)}&mode=confirm_signup`
+        // );
+        return redirect("/", {
+          headers: {
+            "Set-Cookie": sessionCookie.serialize(),
+          },
+        });
       }
     }
 

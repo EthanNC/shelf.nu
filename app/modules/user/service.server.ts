@@ -133,7 +133,8 @@ export async function createUserOrAttachOrg({
 
       return await createUser({
         email,
-        userId: authAccount.id,
+        password,
+        id: authAccount.id,
         username: randomUsernameFromEmail(email),
         organizationId,
         roles,
@@ -163,15 +164,23 @@ export async function createUserOrAttachOrg({
 
 export async function createUser(
   payload: Pick<
-    AuthSession & { username: string },
-    "userId" | "email" | "username"
+    User & { username: string },
+    "id" | "email" | "username" | "password"
   > & {
     organizationId?: Organization["id"];
     roles?: OrganizationRoles[];
     firstName?: User["firstName"];
   }
 ) {
-  const { email, userId, username, organizationId, roles, firstName } = payload;
+  const {
+    email,
+    id: userId,
+    username,
+    organizationId,
+    roles,
+    firstName,
+    password,
+  } = payload;
 
   try {
     return await db.$transaction(
@@ -179,6 +188,7 @@ export async function createUser(
         const user = await tx.user.create({
           data: {
             email,
+            password,
             id: userId,
             username,
             firstName,
@@ -512,7 +522,8 @@ export async function createUserAccountForTesting(
 
   const user = await createUser({
     email: authSession.email,
-    userId: authSession.userId,
+    id: authSession.userId,
+    password,
     username,
   }).catch(() => null);
 
