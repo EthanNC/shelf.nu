@@ -8,7 +8,6 @@ import { remix } from "remix-hono/handler";
 import { getSession, session } from "remix-hono/session";
 
 import { initEnv, env } from "~/utils/env";
-import { ShelfError } from "~/utils/error";
 
 import { auth } from "./auth";
 import { importDevBuild } from "./dev/server";
@@ -134,9 +133,14 @@ app.use(async (c, next) => {
     async getLoadContext(context) {
       const { session, user } = await auth(context);
 
-      //TODO: use Shelf Error here
+      //TODO: maybe use Shelf Error here or do Flash error
       if (!session || !user) {
-        throw new Error("Session or user not found");
+        return {
+          appVersion: isProductionMode ? build.assets.version : "dev",
+          isAuthenticated: false,
+          user: {},
+          session: {},
+        } as AppLoadContext;
       }
 
       return {

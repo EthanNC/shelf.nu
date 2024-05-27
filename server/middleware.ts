@@ -2,6 +2,7 @@ import { createMiddleware } from "hono/factory";
 import { pathToRegexp } from "path-to-regexp";
 import { getSession } from "remix-hono/session";
 
+import { lucia } from "~/modules/auth/lucia.server";
 import { refreshAccessToken } from "~/modules/auth/service.server";
 import type { FlashData } from "./session";
 import { authSessionKey } from "./session";
@@ -25,15 +26,15 @@ export function protect({
     if (isPublic) {
       return next();
     }
-    //@ts-expect-error fixed soon
-    const session = getSession<SessionData, FlashData>(c);
-    const auth = session.get(authSessionKey);
 
+    const cookieHeader = c.req.header("Cookie");
+    const auth = lucia.readSessionCookie(cookieHeader ?? "");
+    // TODO reimplement flash with lucia
     if (!auth) {
-      session.flash(
-        "errorMessage",
-        "This content is only available to logged in users."
-      );
+      // session.flash(
+      //   "errorMessage",
+      //   "This content is only available to logged in users."
+      // );
 
       return c.redirect(`${onFailRedirectTo}?redirectTo=${c.req.path}`);
     }
