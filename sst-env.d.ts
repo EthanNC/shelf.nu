@@ -15,6 +15,10 @@ declare module "sst" {
       name: string
       type: "sst.aws.Bucket"
     }
+    MyEmail: {
+      sender: string
+      type: "sst.aws.Email"
+    }
     Profile: {
       name: string
       type: "sst.aws.Bucket"

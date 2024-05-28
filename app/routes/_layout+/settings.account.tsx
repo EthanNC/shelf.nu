@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
+import { json } from "@remix-run/node";
 
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { useAtom, useAtomValue } from "jotai";
@@ -13,7 +13,7 @@ import PasswordResetForm from "~/components/user/password-reset-form";
 import ProfilePicture from "~/components/user/profile-picture";
 
 import { useUserData } from "~/hooks/use-user-data";
-import { destroySession, logout } from "~/modules/auth/lucia.server";
+import { logout } from "~/modules/auth/lucia.server";
 import { sendResetPasswordLink } from "~/modules/auth/service.server";
 import {
   updateProfilePicture,

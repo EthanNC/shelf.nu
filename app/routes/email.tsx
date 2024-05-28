@@ -1,5 +1,3 @@
-import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
-import MailComposer from "nodemailer/lib/mail-composer/index.js";
 import { Resource } from "sst";
 import { sendEmailSes } from "~/utils/mail.server";
 

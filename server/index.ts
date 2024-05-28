@@ -5,7 +5,7 @@ import { createCookieSessionStorage } from "@remix-run/node";
 import { Hono } from "hono";
 import type { Session, User } from "lucia";
 import { remix } from "remix-hono/handler";
-import { getSession, session } from "remix-hono/session";
+import { session } from "remix-hono/session";
 
 import { initEnv, env } from "~/utils/env";
 
@@ -13,8 +13,6 @@ import { auth } from "./auth";
 import { importDevBuild } from "./dev/server";
 import { logger } from "./logger";
 import { cache, protect, refreshSession } from "./middleware";
-import { authSessionKey } from "./session";
-import type { FlashData, SessionData } from "./session";
 
 // Server will not start if the env is not valid
 initEnv();

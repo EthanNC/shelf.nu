@@ -58,7 +58,7 @@ const LoginFormSchema = z.object({
   redirectTo: z.string().optional(),
 });
 
-export async function action({ context, request }: ActionFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   try {
     const method = getActionMethod(request);
 
