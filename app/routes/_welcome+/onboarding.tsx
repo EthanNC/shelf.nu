@@ -18,7 +18,6 @@ import PasswordInput from "~/components/forms/password-input";
 import { Button } from "~/components/shared/button";
 import { config } from "~/config/shelf.config";
 import { onboardingEmailText } from "~/emails/onboarding-email";
-import { getAuthUserById } from "~/modules/auth/service.server";
 import { setSelectedOrganizationIdCookie } from "~/modules/organization/context.server";
 import { getUserByID, updateUser } from "~/modules/user/service.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
@@ -71,11 +70,9 @@ export async function loader({ context }: LoaderFunctionArgs) {
     if (user.onboarded) {
       return redirect("/");
     }
-
-    const authUser = await getAuthUserById(userId);
-
-    const userSignedUpWithPassword =
-      authUser.user_metadata.signup_method === "email-password";
+    //TODO: add back logic when with Totp
+    const userSignedUpWithPassword = true;
+    // authUser.user_metadata.signup_method === "email-password";
     const OnboardingFormSchema = createOnboardingSchema(
       userSignedUpWithPassword
     );
