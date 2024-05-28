@@ -13,6 +13,7 @@ import PasswordResetForm from "~/components/user/password-reset-form";
 import ProfilePicture from "~/components/user/profile-picture";
 
 import { useUserData } from "~/hooks/use-user-data";
+import { destroySession, logout } from "~/modules/auth/lucia.server";
 import { sendResetPasswordLink } from "~/modules/auth/service.server";
 import {
   updateProfilePicture,
@@ -69,14 +70,14 @@ export async function action({ context, request }: ActionFunctionArgs) {
       case "resetPassword": {
         const { email } = payload;
 
+        //TODO: Replace with Ses Logic
         await sendResetPasswordLink(email);
 
         /** Logout user after 3 seconds */
         await delay(2000);
 
-        context.destroySession();
-
-        return redirect("/login");
+        //TODO:might need to change this to just destroy the session
+        return await logout(request);
       }
       case "updateUser": {
         /** Create the payload if the client side validation works */
