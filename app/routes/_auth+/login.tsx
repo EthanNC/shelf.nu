@@ -10,20 +10,22 @@ import {
   useNavigation,
   useSearchParams,
 } from "@remix-run/react";
+import { Argon2id } from "oslo/password";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
 
 import Input from "~/components/forms/input";
 import PasswordInput from "~/components/forms/password-input";
 import { Button } from "~/components/shared/button";
+import { db } from "~/database/db.server";
 import { ContinueWithEmailForm } from "~/modules/auth/components/continue-with-email-form";
-import { signInWithEmail } from "~/modules/auth/service.server";
+import { lucia } from "~/modules/auth/lucia.server";
 
 import { setSelectedOrganizationIdCookie } from "~/modules/organization/context.server";
 import { getOrganizationByUserId } from "~/modules/organization/service.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { setCookie } from "~/utils/cookies.server";
-import { makeShelfError, notAllowedMethod } from "~/utils/error";
+import { ShelfError, makeShelfError, notAllowedMethod } from "~/utils/error";
 import { isFormProcessing } from "~/utils/form";
 import {
   data,
@@ -67,22 +69,61 @@ export async function action({ context, request }: ActionFunctionArgs) {
           LoginFormSchema
         );
 
-        const authSession = await signInWithEmail(email, password);
+        const existingUser = await db.user.findUnique({
+          where: {
+            email: email,
+          },
+        });
 
-        if (!authSession) {
-          return redirect(`/otp?email=${encodeURIComponent(email)}&mode=login`);
+        if (!existingUser) {
+          throw new ShelfError({
+            cause: null,
+            message: "Incorrect email or password",
+            additionalData: {
+              email,
+            },
+            label: "Auth",
+            shouldBeCaptured: false,
+            status: 409,
+          });
+        }
+
+        //TODO: add back logic when with Totp
+        // if (!authSession) {
+        //   return redirect(`/otp?email=${encodeURIComponent(email)}&mode=login`);
+        // }
+
+        const validPassword = await new Argon2id().verify(
+          existingUser.password,
+          password
+        );
+
+        if (!validPassword) {
+          throw new ShelfError({
+            cause: null,
+            message: "Incorrect email or password",
+            additionalData: {
+              email,
+            },
+            label: "Auth",
+            shouldBeCaptured: false,
+            status: 409,
+          });
         }
 
         const personalOrganization = await getOrganizationByUserId({
-          userId: authSession.userId,
+          userId: existingUser.id,
           orgType: "PERSONAL",
         });
 
         // Set the auth session and redirect to the assets page
-        context.setSession(authSession);
+
+        const session = await lucia.createSession(existingUser.id, {});
+        const sessionCookie = lucia.createSessionCookie(session.id);
 
         return redirect(safeRedirect(redirectTo || "/assets"), {
           headers: [
+            ["Set-Cookie", sessionCookie.serialize()],
             setCookie(
               await setSelectedOrganizationIdCookie(personalOrganization.id)
             ),
