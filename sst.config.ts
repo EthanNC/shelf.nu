@@ -41,6 +41,10 @@ export default $config({
       public: true,
     });
 
+    const email = new sst.aws.Email("MyEmail", {
+      sender: "aws.relocate063@passinbox.com",
+    });
+
     const lambdaPrismaConfig = {
       copyFiles: Boolean($dev)
         ? []
@@ -76,7 +80,7 @@ export default $config({
 
     new sst.aws.Remix("MyWeb", {
       buildCommand: "npm run build",
-      link: [project, media, profile],
+      link: [project, media, profile, email],
       environment: {
         NODE_ENV: $dev ? "development" : "production",
         SESSION_SECRET: new random.RandomString("SessionSecret", {
@@ -84,6 +88,7 @@ export default $config({
         }).result,
         SERVER_URL: "http://localhost:3000/",
         SUPABASE_URL: $interpolate`https://${project.id}.supabase.co`,
+        SEND_ONBOARDING_EMAIL: "true",
         SUPABASE_ANON_PUBLIC: process.env.SUPABASE_ANON_PUBLIC!,
         SUPABASE_SERVICE_ROLE: process.env.SUPABASE_SERVICE_ROLE!,
       },
