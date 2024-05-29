@@ -3,6 +3,7 @@ import { Prisma, Roles, OrganizationRoles } from "@prisma/client";
 import type { ITXClientDenyList } from "@prisma/client/runtime/library";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { LoaderFunctionArgs } from "@remix-run/node";
+import { generateId } from "lucia";
 import sharp from "sharp";
 import type { AuthSession } from "server/session";
 import type { ExtendedPrismaClient } from "~/database/db.server";
@@ -12,7 +13,6 @@ import {
   deleteAuthAccount,
   createEmailAuthAccount,
   signInWithEmail,
-  updateAccountPassword,
 } from "~/modules/auth/service.server";
 
 import { dateTimeInUnix } from "~/utils/date-time-in-unix";
@@ -120,31 +120,22 @@ export async function createUserOrAttachOrg({
      * This will always fail because we need them to confirm their email before we create a user in shelf
      */
     if (!shelfUser?.id) {
-      const authAccount = await createEmailAuthAccount(email, password).catch(
-        (cause) => {
-          throw new ShelfError({
-            cause,
-            message:
-              "We are facing some issue with your account. Most likely you are trying to accept an invite, before you have confirmed your account's email. Please try again after confirming your email. If the issue persists, feel free to contact support.",
-            label,
-          });
-        }
-      );
+      const userId = generateId(15);
 
       return await createUser({
         email,
         password,
-        id: authAccount.id,
+        id: userId,
         username: randomUsernameFromEmail(email),
         organizationId,
         roles,
         firstName,
       });
     }
-
+    //TODO: Have not tested adding non-new user to org
     /** If the user already exists, we just attach the new org to it */
     await createUserOrgAssociation(db, {
-      userId: shelfUser.id,
+      userId: shelfUser?.id,
       organizationIds: [organizationId],
       roles,
     });
@@ -288,16 +279,6 @@ export async function updateUser(updateUserPayload: UpdateUserPayload) {
         },
       },
     });
-
-    if (
-      updateUserPayload.password &&
-      updateUserPayload.password.trim() !== ""
-    ) {
-      await updateAccountPassword(
-        updateUserPayload.id,
-        updateUserPayload.password
-      );
-    }
 
     return updatedUser;
   } catch (cause) {

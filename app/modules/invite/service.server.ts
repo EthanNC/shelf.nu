@@ -10,7 +10,7 @@ import { sendNotification } from "~/utils/emitter/send-notification.server";
 import { INVITE_TOKEN_SECRET } from "~/utils/env";
 import type { ErrorLabel } from "~/utils/error";
 import { ShelfError, isLikeShelfError } from "~/utils/error";
-import { sendEmail } from "~/utils/mail.server";
+import { sendEmailSes } from "~/utils/mail.server";
 import { generateRandomCode, inviteEmailText } from "./helpers";
 import { createTeamMember } from "../team-member/service.server";
 import { createUserOrAttachOrg } from "../user/service.server";
@@ -197,7 +197,7 @@ export async function createInvite(
       expiresIn: `${INVITE_EXPIRY_TTL_DAYS}d`,
     }); //keep only needed data in token to maintain the size
 
-    await sendEmail({
+    await sendEmailSes({
       to: inviteeEmail,
       subject: `You have been invited to ${invite.organization.name}`,
       text: inviteEmailText({ invite, token }),

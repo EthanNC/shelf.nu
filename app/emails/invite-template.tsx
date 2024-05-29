@@ -36,7 +36,7 @@ export function InvitationEmailTemplate({ invite, token }: Props) {
             ’s workspace. Click the link to accept the invite:
           </Text>
           <Button
-            href={`${SERVER_URL}/accept-invite/${invite.id}?token=${token}`}
+            href={`${SERVER_URL}accept-invite/${invite.id}?token=${token}`}
             style={{ ...styles.button, textAlign: "center" }}
           >
             Accept the invite
