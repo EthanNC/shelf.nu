@@ -100,7 +100,7 @@ app.use(
       "/logout",
       "/otp",
       "/resend-otp",
-      "/reset-password",
+      "/reset-password/:path*",
       "/send-otp",
       "/healthcheck",
       "/api/public-stats",

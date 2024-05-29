@@ -1,30 +1,30 @@
-import { useEffect, useState } from "react";
-
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
 } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
+import {
+  Form,
+  useActionData,
+  useLoaderData,
+  useNavigation,
+} from "@remix-run/react";
+import { Argon2id } from "oslo/password";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
 
 import PasswordInput from "~/components/forms/password-input";
 import { Button } from "~/components/shared/button";
-import { supabaseClient } from "~/integrations/supabase/client";
-
-import {
-  refreshAccessToken,
-  updateAccountPassword,
-} from "~/modules/auth/service.server";
+import { db } from "~/database/db.server";
+import { lucia } from "~/modules/auth/lucia.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
-import { makeShelfError, notAllowedMethod } from "~/utils/error";
+import { ShelfError, makeShelfError, notAllowedMethod } from "~/utils/error";
 import { isFormProcessing } from "~/utils/form";
 import { data, error, getActionMethod, parseData } from "~/utils/http.server";
 import { tw } from "~/utils/tw";
 
-export function loader({ context }: LoaderFunctionArgs) {
+export function loader({ params, context }: LoaderFunctionArgs) {
   const title = "Set new password";
   const subHeading =
     "Your new password must be different to previously used passwords.";
@@ -33,7 +33,7 @@ export function loader({ context }: LoaderFunctionArgs) {
     return redirect("/assets");
   }
 
-  return json(data({ title, subHeading }));
+  return json(data({ title, subHeading, token: params.token }));
 }
 
 const ResetPasswordSchema = z
@@ -56,7 +56,7 @@ const ResetPasswordSchema = z
     return { password, confirmPassword, refreshToken };
   });
 
-export async function action({ context, request }: ActionFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   try {
     const method = getActionMethod(request);
 
@@ -66,15 +66,36 @@ export async function action({ context, request }: ActionFunctionArgs) {
           await request.formData(),
           ResetPasswordSchema
         );
+        const databaseToken = await db.passwordResetToken.findUnique({
+          where: { id: refreshToken },
+        });
 
-        const authSession = await refreshAccessToken(refreshToken);
+        //TODO: make delete token atomic with password update using transaction
+        if (databaseToken) {
+          await db.passwordResetToken.delete({ where: { id: refreshToken } });
+        } else {
+          throw new ShelfError({
+            cause: null,
+            message: "Invalid token when resetting password",
+            label: "Auth",
+          });
+        }
 
-        await updateAccountPassword(authSession.userId, password);
+        await lucia.invalidateUserSessions(databaseToken.userId);
+        const hashedPassword = await new Argon2id().hash(password);
 
-        // Commit the session and redirect
-        context.setSession({ ...authSession });
+        await db.user.update({
+          where: { id: databaseToken.userId },
+          data: { password: hashedPassword },
+        });
+        const session = await lucia.createSession(databaseToken.userId, {});
+        const cookies = lucia.createSessionCookie(session.id);
 
-        return redirect("/");
+        return redirect("/", {
+          headers: {
+            "Set-Cookie": cookies.serialize(),
+          },
+        });
       }
     }
 
@@ -91,31 +112,10 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 
 export default function ResetPassword() {
   const zo = useZorm("ResetPasswordForm", ResetPasswordSchema);
-  const [userRefreshToken, setUserRefreshToken] = useState("");
   const actionData = useActionData<typeof action>();
+  const { token } = useLoaderData<typeof loader>();
   const transition = useNavigation();
   const disabled = isFormProcessing(transition.state);
-
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabaseClient.auth.onAuthStateChange((event, supabaseSession) => {
-      // In local development, we doesn't see "PASSWORD_RECOVERY" event because:
-      // Effect run twice and break listener chain
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
-        const refreshToken = supabaseSession?.refresh_token;
-
-        if (!refreshToken) return;
-
-        setUserRefreshToken(refreshToken);
-      }
-    });
-
-    return () => {
-      // prevent memory leak. Listener stays alive 👨‍🎤
-      subscription.unsubscribe();
-    };
-  }, [setUserRefreshToken]);
 
   return (
     <div className="flex min-h-full flex-col justify-center">
@@ -140,11 +140,7 @@ export default function ResetPassword() {
             error={zo.errors.confirmPassword()?.message}
           />
 
-          <input
-            type="hidden"
-            name={zo.fields.refreshToken()}
-            value={userRefreshToken}
-          />
+          <input type="hidden" name={zo.fields.refreshToken()} value={token} />
           <Button
             data-test-id="change-password"
             type="submit"
