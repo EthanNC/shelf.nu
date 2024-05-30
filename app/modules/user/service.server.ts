@@ -10,7 +10,6 @@ import type { ExtendedPrismaClient } from "~/database/db.server";
 import { db } from "~/database/db.server";
 
 import {
-  deleteAuthAccount,
   createEmailAuthAccount,
   signInWithEmail,
 } from "~/modules/auth/service.server";
@@ -472,8 +471,6 @@ export async function deleteUser(id: User["id"]) {
       });
     }
   }
-
-  await deleteAuthAccount(id);
 }
 
 export { defaultUserCategories };
@@ -497,7 +494,7 @@ export async function createUserAccountForTesting(
   // user account created but no session 😱
   // we should delete the user account to allow retry create account again
   if (!authSession) {
-    await deleteAuthAccount(authAccount.id);
+    // await deleteAuthAccount(authAccount.id);
     return null;
   }
 
@@ -509,7 +506,7 @@ export async function createUserAccountForTesting(
   }).catch(() => null);
 
   if (!user) {
-    await deleteAuthAccount(authAccount.id);
+    // await deleteAuthAccount(authAccount.id);
     return null;
   }
 
