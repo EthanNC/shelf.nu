@@ -11,8 +11,6 @@ import Input from "~/components/forms/input";
 import { Button } from "~/components/shared/button";
 import { db } from "~/database/db.server";
 import { createPasswordResetToken } from "~/modules/auth/create-password-reset-token.server";
-
-import { sendResetPasswordLink } from "~/modules/auth/service.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { makeShelfError, notAllowedMethod, ShelfError } from "~/utils/error";
 import { isFormProcessing } from "~/utils/form";

@@ -4,7 +4,7 @@ import { json, redirect } from "@remix-run/node";
 import { z } from "zod";
 import { Spinner } from "~/components/shared/spinner";
 import { db } from "~/database/db.server";
-import { lucia, signUpWithEmailPass } from "~/modules/auth/lucia.server";
+import { hashPassword, lucia } from "~/modules/auth/lucia.server";
 import { generateRandomCode } from "~/modules/invite/helpers";
 import {
   checkUserAndInviteMatch,
@@ -38,11 +38,13 @@ export async function loader({ context, request, params }: LoaderFunctionArgs) {
     const decodedInvite = jwt.verify(token, INVITE_TOKEN_SECRET) as {
       id: string;
     };
+
     const password = generateRandomCode(10);
+    const hashedPassword = await hashPassword(password);
     const updatedInvite = await updateInviteStatus({
       id: decodedInvite.id,
       status: InviteStatuses.ACCEPTED,
-      password,
+      password: hashedPassword,
     });
 
     if (updatedInvite.status !== InviteStatuses.ACCEPTED) {

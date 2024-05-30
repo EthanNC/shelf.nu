@@ -83,6 +83,10 @@ export async function signUpWithEmailPass(email: string, password: string) {
   }
 }
 
+export async function hashPassword(password: string) {
+  return new Argon2id().hash(password);
+}
+
 // export function createSession(user: User) {
 //   const sessionCookie = lucia.createSessionCookie({
 //     attributes: {
