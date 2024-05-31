@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -107,8 +108,19 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
     throw notAllowedMethod(method);
   } catch (cause) {
-    const reason = makeShelfError(cause);
-    return json(error(reason), { status: reason.status });
+    if (
+      cause instanceof PrismaClientKnownRequestError &&
+      cause.code === "P2025"
+    ) {
+      throw new ShelfError({
+        cause,
+        message: "Invalid Email Verification Code. Please try again.",
+        label: "Auth",
+      });
+    } else {
+      const reason = makeShelfError(cause);
+      return json(error(reason), { status: reason.status });
+    }
   }
 }
 

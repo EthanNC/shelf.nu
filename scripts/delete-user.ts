@@ -24,17 +24,17 @@ const db = new PrismaClient({
 
 const answers = {
   firstName: await input({
-    message: "What is the email of the user you are trying to make admin",
+    message: "What is the email of the user you are trying to delete?",
   }),
   allowEmail: await confirm({
     message: "Are you sure this is the correct email?",
   }),
 };
 
-export async function deleteUser(id: User["email"]) {
+export async function deleteUser(email: User["email"]) {
   try {
     const user = await db.user.findUnique({
-      where: { email: id },
+      where: { email: email },
       include: {
         organizations: true,
         categories: true,
@@ -65,7 +65,7 @@ export async function deleteUser(id: User["email"]) {
         console.log("Personal organization not found, so no need to delete");
       });
 
-    await db.user.delete({ where: { email: id } });
+    await db.user.delete({ where: { email: email } });
   } catch (cause) {
     if (
       cause instanceof PrismaClientKnownRequestError &&
