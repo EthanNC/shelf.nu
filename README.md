@@ -1,4 +1,21 @@
-# Shelf.nu
+# Shelf.sst
+
+This is a fork of the open source project [Shelf.nu](github.com/Shelf-nu/shelf.nu), which aims to deploy the project using the Ion engine developed by [SST](https://ion.sst.dev/). The goal is to have a full-stack deployment using the SST framework on AWS infrastructure.
+
+Shelf.nu uses [Supabase](https://supabase.com/) for the backend database, image storage, and authentication provider. The work done so far has been to replace the authentication and file storage layer with [Lucia](https://github.com/lucia-auth/lucia) and S3 respectively. The Supabase provided PostgresDB is still used for the database as it most affordable database solution currently available.
+
+## Key Changes
+
+- Provision the PostgresDB using [pulumi-supabase](https://github.com/sst/pulumi-supabase)
+- Removed Supabase authentication and replaced with Lucia
+- Removed Supabase Storage and replaced with S3 Buckets
+- Deploy the Remix application to AWS Cloudfront
+
+## Things to do
+
+- Make Playwright test environment work
+- replace the SSE powered notification system with an AWS PUB/SUB system
+- Shelf.nu beta Booking System uses [pg-boss](https://github.com/timgit/pg-boss) as a job queue. This can be replaced with SST [Queue](https://ion.sst.dev/docs/component/aws/queue/)
 
 <a href="https://www.shelf.nu/" target="_blank">
 <img width="100%" src="./public/static/images/readme-cover.jpg" />
