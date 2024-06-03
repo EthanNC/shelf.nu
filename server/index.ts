@@ -81,7 +81,7 @@ app.use(
  * Add refresh session middleware
  *
  */
-app.use("*", refreshSession());
+// app.use("*", refreshSession());
 
 /**
  * Add protected routes middleware
