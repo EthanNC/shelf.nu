@@ -31,7 +31,7 @@ import {
 import { requirePermission } from "~/utils/roles.server";
 
 export async function loader({ context, request, params }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { assetId } = getParams(params, z.object({ assetId: z.string() }), {
     additionalData: { userId },
@@ -85,7 +85,7 @@ const DuplicateAssetSchema = z.object({
 });
 
 export async function action({ context, request, params }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { assetId } = getParams(params, z.object({ assetId: z.string() }), {
     additionalData: { userId },

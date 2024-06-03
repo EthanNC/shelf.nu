@@ -44,7 +44,7 @@ export type AllowedModelNames = z.infer<typeof ModelFiltersSchema>["name"];
 export type ModelFilters = z.infer<typeof ModelFiltersSchema>;
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

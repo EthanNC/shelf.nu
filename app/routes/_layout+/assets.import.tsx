@@ -31,7 +31,7 @@ import {
 import { requirePermission } from "~/utils/roles.server";
 
 export const action = async ({ context, request }: ActionFunctionArgs) => {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {
@@ -87,7 +87,7 @@ export const action = async ({ context, request }: ActionFunctionArgs) => {
 };
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

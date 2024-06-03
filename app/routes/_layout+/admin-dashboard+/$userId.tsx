@@ -23,7 +23,7 @@ export type UserWithQrCodes = User & {
 };
 
 export const loader = async ({ context, params }: LoaderFunctionArgs) => {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { userId: shelfUserId } = getParams(
     params,
@@ -98,7 +98,7 @@ export const action = async ({
   request,
   params,
 }: ActionFunctionArgs) => {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { userId: shelfUserId } = getParams(
     params,

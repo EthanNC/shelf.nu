@@ -6,7 +6,7 @@ import { makeShelfError } from "~/utils/error";
 import { error, parseData } from "~/utils/http.server";
 
 export async function action({ context, request }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

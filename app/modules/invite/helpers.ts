@@ -23,7 +23,7 @@ export const inviteEmailText = ({
 ${invite.inviter.firstName} ${invite.inviter.lastName} invites you to join Shelf as a member of ${invite.organization.name}’s workspace.
 
 Click the link to accept the invite:
-${SERVER_URL}/accept-invite/${invite.id}?token=${token}
+${SERVER_URL}accept-invite/${invite.id}?token=${token}
 
 Once you’re done setting up your account, you'll be able to access the workspace and start exploring features like Asset Explorer, Location Tracking, Collaboration, Custom fields and more.
 

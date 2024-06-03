@@ -34,6 +34,7 @@ model User {
   id             String  @id @default(cuid())
   email          String  @unique
   username       String  @unique @default(cuid())
+  password       String
   firstName      String?
   lastName       String?
   profilePicture String?
@@ -59,14 +60,24 @@ model User {
   images            Image[]
   organizations     Organization[]
   customFields      CustomField[]
-  sentInvites       Invite[]           @relation("inviter")
-  receivedInvites   Invite[]           @relation("invitee")
+  sentInvites       Invite[]                @relation("inviter")
+  receivedInvites   Invite[]                @relation("invitee")
   teamMembers       TeamMember[]
   userOrganizations UserOrganization[]
-  bookings          Booking[]          @relation("creator")
-  custodies         Booking[]          @relation("custodian")
+  bookings          Booking[]               @relation("creator")
+  custodies         Booking[]               @relation("custodian")
+  sessions          Session[]
+  emailCodes        EmailVerificationCode[]
+  tokens            PasswordResetToken[]
 
   @@unique([email, username])
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
 }
 
 model Asset {
@@ -602,4 +613,26 @@ model Booking {
   updatedAt DateTime  @updatedAt @db.Timestamptz(3)
   from      DateTime? @db.Timestamptz(3)
   to        DateTime? @db.Timestamptz(3)
+}
+
+model EmailVerificationCode {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  code      String
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

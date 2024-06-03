@@ -23,7 +23,7 @@ import { canCreateMoreOrganizations } from "~/utils/subscription";
 import { tw } from "~/utils/tw";
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {

@@ -1,12 +1,13 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
+import { logout } from "~/modules/auth/lucia.server";
 
 import { assertIsPost } from "~/utils/http.server";
 
-export function action({ context, request }: ActionFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   assertIsPost(request);
-  context.destroySession();
-  return redirect("/login");
+  const cookie = await logout(request);
+  return cookie;
 }
 
 export function loader() {

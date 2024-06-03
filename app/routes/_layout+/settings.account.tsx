@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
+import { json } from "@remix-run/node";
 
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { useAtom, useAtomValue } from "jotai";
@@ -13,7 +13,8 @@ import PasswordResetForm from "~/components/user/password-reset-form";
 import ProfilePicture from "~/components/user/profile-picture";
 
 import { useUserData } from "~/hooks/use-user-data";
-import { sendResetPasswordLink } from "~/modules/auth/service.server";
+import { createPasswordResetToken } from "~/modules/auth/create-password-reset-token.server";
+import { logout } from "~/modules/auth/lucia.server";
 import {
   updateProfilePicture,
   updateUser,
@@ -28,6 +29,7 @@ import { makeShelfError } from "~/utils/error";
 import { isFormProcessing } from "~/utils/form";
 import { getValidationErrors } from "~/utils/http";
 import { data, error, parseData } from "~/utils/http.server";
+import { sendEmailSes } from "~/utils/mail.server";
 import { zodFieldIsRequired } from "~/utils/zod";
 
 export const UpdateFormSchema = z.object({
@@ -53,7 +55,7 @@ const Actions = z.discriminatedUnion("intent", [
 ]);
 
 export async function action({ context, request }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {
@@ -69,14 +71,21 @@ export async function action({ context, request }: ActionFunctionArgs) {
       case "resetPassword": {
         const { email } = payload;
 
-        await sendResetPasswordLink(email);
+        const verificationToken = await createPasswordResetToken(userId);
+        const link =
+          `${process.env.SERVER_URL}reset-password/` + verificationToken;
+
+        await sendEmailSes({
+          to: email,
+          subject: `Reset your Shelf.nu password`,
+          text: `Click here to reset your password: ${link}`,
+          html: `<p>Click <a href="${link}">here</a> to reset your password</p>`,
+        });
 
         /** Logout user after 3 seconds */
         await delay(2000);
 
-        context.destroySession();
-
-        return redirect("/login");
+        return await logout(request);
       }
       case "updateUser": {
         /** Create the payload if the client side validation works */

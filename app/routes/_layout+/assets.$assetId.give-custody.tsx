@@ -36,7 +36,7 @@ import { stringToJSONSchema } from "~/utils/zod";
 import type { AssetWithBooking } from "./bookings.$bookingId.add-assets";
 
 export async function loader({ context, request, params }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { assetId } = getParams(params, z.object({ assetId: z.string() }), {
     additionalData: { userId },
@@ -135,7 +135,7 @@ export async function loader({ context, request, params }: LoaderFunctionArgs) {
 }
 
 export async function action({ context, request, params }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { assetId } = getParams(params, z.object({ assetId: z.string() }), {
     additionalData: { userId },

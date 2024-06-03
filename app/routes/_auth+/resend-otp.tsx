@@ -1,10 +1,12 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { z } from "zod";
-import { resendVerificationEmail } from "~/modules/auth/service.server";
+import { db } from "~/database/db.server";
+import { generateEmailVerificationCode } from "~/modules/auth/generate-email-verification-code";
 import { makeShelfError, notAllowedMethod } from "~/utils/error";
 
 import { error, getActionMethod, parseData } from "~/utils/http.server";
+import { sendEmailSes } from "~/utils/mail.server";
 import { validEmail } from "~/utils/misc";
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -24,8 +26,24 @@ export async function action({ request }: ActionFunctionArgs) {
               })),
           })
         );
+        const user = await db.emailVerificationCode.findFirst({
+          where: {
+            email,
+          },
+        });
 
-        await resendVerificationEmail(email);
+        if (!user) {
+          throw new Error("User not found");
+        }
+
+        const code = await generateEmailVerificationCode(user.id, email);
+
+        await sendEmailSes({
+          to: email,
+          subject: `Shelf.nu Email Verification Code`,
+          text: `Please use the following code to verify your email: ${code}`,
+          html: `<p>Please use the following to verif</p><p>${code}</p>`,
+        });
       }
     }
 

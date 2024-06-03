@@ -54,7 +54,7 @@ import { requirePermission } from "~/utils/roles.server";
 import { bookingStatusColorMap } from "./bookings";
 
 export async function loader({ context, request, params }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { bookingId } = getParams(params, z.object({ bookingId: z.string() }), {
     additionalData: { userId },
@@ -227,7 +227,7 @@ export const handle = {
 };
 
 export async function action({ context, request, params }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { bookingId: id } = getParams(
     params,

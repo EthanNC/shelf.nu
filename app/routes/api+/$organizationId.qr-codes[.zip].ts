@@ -7,7 +7,7 @@ import { requireAdmin } from "~/utils/roles.server";
 import { createQrCodesZip } from "~/utils/zip-qr-codes";
 
 export async function loader({ context, request, params }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { organizationId } = getParams(
     params,

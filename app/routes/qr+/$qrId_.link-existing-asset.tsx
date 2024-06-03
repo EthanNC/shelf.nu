@@ -63,7 +63,7 @@ export const loader = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { qrId } = getParams(params, z.object({ qrId: z.string() }));
 
@@ -166,7 +166,7 @@ export const action = async ({
   request,
   params,
 }: LoaderFunctionArgs) => {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { qrId } = getParams(params, z.object({ qrId: z.string() }));
 
   try {

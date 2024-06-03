@@ -5,7 +5,7 @@ import { ShelfError, makeShelfError } from "~/utils/error";
 import { error, getParams } from "~/utils/http.server";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { imageId } = getParams(params, z.object({ imageId: z.string() }), {
     additionalData: { userId },

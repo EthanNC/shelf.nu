@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -15,13 +16,13 @@ import { useZorm } from "react-zorm";
 import { z } from "zod";
 import Input from "~/components/forms/input";
 import { Button } from "~/components/shared/button";
-import { verifyOtpAndSignin } from "~/modules/auth/service.server";
+import { db } from "~/database/db.server";
+import { lucia } from "~/modules/auth/lucia.server";
 import { setSelectedOrganizationIdCookie } from "~/modules/organization/context.server";
 import { getOrganizationByUserId } from "~/modules/organization/service.server";
-import { createUser, findUserByEmail } from "~/modules/user/service.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { setCookie } from "~/utils/cookies.server";
-import { makeShelfError, notAllowedMethod } from "~/utils/error";
+import { ShelfError, makeShelfError, notAllowedMethod } from "~/utils/error";
 import { isFormProcessing } from "~/utils/form";
 import { isErrorResponse } from "~/utils/http";
 import {
@@ -34,7 +35,6 @@ import {
 import { validEmail } from "~/utils/misc";
 import { getOtpPageData, type OtpVerifyMode } from "~/utils/otp";
 import { tw } from "~/utils/tw";
-import { randomUsernameFromEmail } from "~/utils/user";
 
 export function loader({ context, request }: LoaderFunctionArgs) {
   const { searchParams } = new URL(request.url);
@@ -69,26 +69,35 @@ export async function action({ context, request }: ActionFunctionArgs) {
             "Invalid request. Please try again. If the issue persists, contact support.",
         });
 
-        const authSession = await verifyOtpAndSignin(email, otp);
-        const userExists = Boolean(await findUserByEmail(email));
+        const emailVerificationCode = await db.emailVerificationCode.findFirst({
+          where: {
+            email,
+            code: otp,
+          },
+        });
 
-        if (!userExists) {
-          await createUser({
-            ...authSession,
-            username: randomUsernameFromEmail(authSession.email),
+        if (!emailVerificationCode) {
+          throw new ShelfError({
+            cause: null,
+            message: "Invalid Email Verification Code. Please try again.",
+            label: "Auth",
           });
         }
 
         const personalOrganization = await getOrganizationByUserId({
-          userId: authSession.userId,
+          userId: emailVerificationCode.userId,
           orgType: "PERSONAL",
         });
 
-        // Setting the auth session and redirecting user to assets page
-        context.setSession(authSession);
+        const session = await lucia.createSession(
+          emailVerificationCode.userId,
+          {}
+        );
+        const sessionCookie = lucia.createSessionCookie(session.id);
 
         return redirect(safeRedirect("/assets"), {
           headers: [
+            ["Set-Cookie", sessionCookie.serialize()],
             setCookie(
               await setSelectedOrganizationIdCookie(personalOrganization.id)
             ),
@@ -99,8 +108,19 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
     throw notAllowedMethod(method);
   } catch (cause) {
-    const reason = makeShelfError(cause);
-    return json(error(reason), { status: reason.status });
+    if (
+      cause instanceof PrismaClientKnownRequestError &&
+      cause.code === "P2025"
+    ) {
+      throw new ShelfError({
+        cause,
+        message: "Invalid Email Verification Code. Please try again.",
+        label: "Auth",
+      });
+    } else {
+      const reason = makeShelfError(cause);
+      return json(error(reason), { status: reason.status });
+    }
   }
 }
 

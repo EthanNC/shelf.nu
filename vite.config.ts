@@ -26,6 +26,7 @@ export default defineConfig({
   // https://github.com/remix-run/remix/discussions/8917#discussioncomment-8640023
   optimizeDeps: {
     include: ["./app/routes/**/*"],
+    exclude: ["@node-rs/argon2", "@node-rs/bcrypt"],
   },
   resolve: {
     alias: {

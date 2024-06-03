@@ -30,7 +30,7 @@ import { slugify } from "~/utils/slugify";
 type SizeKeys = "cable" | "small" | "medium" | "large";
 
 export async function loader({ context, request, params }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { assetId } = getParams(params, z.object({ assetId: z.string() }), {
     additionalData: { userId },

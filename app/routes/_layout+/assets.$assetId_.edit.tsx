@@ -45,7 +45,7 @@ import { requirePermission } from "~/utils/roles.server";
 import { slugify } from "~/utils/slugify";
 
 export async function loader({ context, request, params }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { assetId: id } = getParams(params, z.object({ assetId: z.string() }), {
     additionalData: { userId },
@@ -112,7 +112,7 @@ export const handle = {
 };
 
 export async function action({ context, request, params }: ActionFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
   const { assetId: id } = getParams(params, z.object({ assetId: z.string() }), {
     additionalData: { userId },

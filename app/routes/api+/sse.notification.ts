@@ -5,7 +5,7 @@ import { ShelfError } from "~/utils/error";
 import { Logger } from "~/utils/logger";
 
 export function loader({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
 
   return eventStream(request.signal, function setup(send) {
     /** Notification is a stringified json object with the shape {@link Notification} */

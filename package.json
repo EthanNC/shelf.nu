@@ -12,13 +12,13 @@
     "db:deploy-migration:staging": "dotenv -e .env.staging -- prisma migrate deploy && prisma generate",
     "db:diff": "prisma migrate diff --from-url=${DATABASE_URL} --to-migrations=./app/database/migrations --shadow-database-url=${SHADOW_DATABASE_URL} --script > rollback.sql",
     "db:generate-type": "prisma generate",
-    "db:prepare-migration": "prisma generate && prisma migrate dev --create-only --skip-seed",
+    "db:prepare-migration": "sst shell bun scripts/prepare-migration.ts",
     "dev": "sst dev remix vite:dev",
     "format": "prettier --write .",
     "format-code": "npm run prettier:fix & npm run lint:fix",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "lint:fix": "npm run lint -- --fix",
-    "precommit": "npm run db:generate-type && npm run lint:fix && npm run format && npm run typecheck",
+    "precommit": "npm run db:generate-type && npm run lint:fix",
     "prepare": "husky install",
     "pretest:e2e:run": "npm run build",
     "production:dev": "dotenv -e .env.production -- run-p dev:*",
@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.575.0",
+    "@aws-sdk/client-sesv2": "^3.577.0",
     "@aws-sdk/lib-storage": "^3.575.0",
     "@aws-sdk/protocol-http": "^3.374.0",
     "@aws-sdk/s3-request-presigner": "^3.575.0",
@@ -48,6 +49,7 @@
     "@fullcalendar/list": "^6.1.11",
     "@fullcalendar/react": "^6.1.11",
     "@hono/node-server": "1.10.1",
+    "@lucia-auth/adapter-prisma": "^4.0.1",
     "@markdoc/markdoc": "^0.4.0",
     "@paralleldrive/cuid2": "^2.2.2",
     "@prisma/client": "^5.9.1",
@@ -88,10 +90,12 @@
     "jotai": "^2.7.1",
     "jsonwebtoken": "^9.0.2",
     "jszip": "^3.10.1",
+    "lucia": "^3.2.0",
     "luxon": "^3.4.4",
     "mapbox-gl": "^3.1.2",
     "maplibre-gl": "^4.0.0",
     "nodemailer": "^6.9.9",
+    "oslo": "^1.2.0",
     "path-to-regexp": "^6.2.1",
     "pg-boss": "^9.0.3",
     "pino": "^8.19.0",
@@ -175,5 +179,8 @@
   },
   "prisma": {
     "schema": "app/database/schema.prisma"
+  },
+  "volta": {
+    "node": "20.13.1"
   }
 }

@@ -23,7 +23,7 @@ import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { sendNotification } from "~/utils/emitter/send-notification.server";
 import { ShelfError, makeShelfError } from "~/utils/error";
 import { data, error, parseData } from "~/utils/http.server";
-import { sendEmail } from "~/utils/mail.server";
+import { sendEmailSes } from "~/utils/mail.server";
 import { isPersonalOrg as checkIsPersonalOrg } from "~/utils/organization";
 import {
   PermissionAction,
@@ -56,7 +56,7 @@ type InviteWithTeamMember = Pick<
 };
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {
@@ -197,7 +197,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
 }
 
 export const action = async ({ context, request }: ActionFunctionArgs) => {
-  const authSession = context.getSession();
+  const authSession = context.session;
   const { userId } = authSession;
 
   try {
@@ -299,7 +299,7 @@ export const action = async ({ context, request }: ActionFunctionArgs) => {
             });
           });
 
-        await sendEmail({
+        await sendEmailSes({
           to: user.email,
           subject: `Access to ${org.name} has been revoked`,
           text: revokeAccessEmailText({ orgName: org.name }),
