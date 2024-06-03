@@ -74,10 +74,7 @@ export async function action({ request }: ActionFunctionArgs) {
           where: { id: refreshToken },
         });
 
-        //TODO: make delete token atomic with password update using transaction
-        if (databaseToken) {
-          await db.passwordResetToken.delete({ where: { id: refreshToken } });
-        } else {
+        if (!databaseToken) {
           throw new ShelfError({
             cause: null,
             message: "Invalid token when resetting password",
@@ -85,13 +82,17 @@ export async function action({ request }: ActionFunctionArgs) {
           });
         }
 
-        await lucia.invalidateUserSessions(databaseToken.userId);
         const hashedPassword = await new Argon2id().hash(password);
 
-        await db.user.update({
-          where: { id: databaseToken.userId },
-          data: { password: hashedPassword },
-        });
+        await db.$transaction([
+          db.passwordResetToken.delete({ where: { id: refreshToken } }),
+          db.user.update({
+            where: { id: databaseToken.userId },
+            data: { password: hashedPassword },
+          }),
+        ]);
+
+        await lucia.invalidateUserSessions(databaseToken.userId);
         const session = await lucia.createSession(databaseToken.userId, {});
         const cookies = lucia.createSessionCookie(session.id);
 
