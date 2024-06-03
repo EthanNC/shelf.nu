@@ -85,7 +85,6 @@ export async function action({ context, request }: ActionFunctionArgs) {
         /** Logout user after 3 seconds */
         await delay(2000);
 
-        //TODO:might need to change this to just destroy the session
         return await logout(request);
       }
       case "updateUser": {

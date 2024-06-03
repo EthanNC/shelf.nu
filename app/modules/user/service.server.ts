@@ -131,7 +131,7 @@ export async function createUserOrAttachOrg({
         firstName,
       });
     }
-    //TODO: Have not tested adding non-new user to org
+
     /** If the user already exists, we just attach the new org to it */
     await createUserOrgAssociation(db, {
       userId: shelfUser?.id,
