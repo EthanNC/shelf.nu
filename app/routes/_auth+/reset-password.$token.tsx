@@ -33,7 +33,11 @@ export function loader({ params, context }: LoaderFunctionArgs) {
     return redirect("/assets");
   }
 
-  return json(data({ title, subHeading, token: params.token }));
+  return json(data({ title, subHeading, token: params.token }), {
+    headers: {
+      "Referrer-Policy": "no-referrer",
+    },
+  });
 }
 
 const ResetPasswordSchema = z
@@ -94,6 +98,7 @@ export async function action({ request }: ActionFunctionArgs) {
         return redirect("/", {
           headers: {
             "Set-Cookie": cookies.serialize(),
+            "Referrer-Policy": "no-referrer",
           },
         });
       }
